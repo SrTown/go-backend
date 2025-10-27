@@ -1,11 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 
+	"github.com/SrTown/go-backend/middlewares"
+	"github.com/SrTown/go-backend/routers"
 	"github.com/gofiber/fiber/v2"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 )
 
@@ -16,65 +20,43 @@ type Todo struct {
 }
 
 func main() {
-	fmt.Println("Holi")
-	app := fiber.New()
+	fmt.Println("Holaa")
 
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatal("Error loading .env file:", err)
 	}
 
+	COCKROCH_URI := os.Getenv("COCKROACH_URI")
 	PORT := os.Getenv("PORT")
 
-	todos := []Todo{}
+	ctx := context.Background()
+	pool, err := pgxpool.New(ctx, COCKROCH_URI)
+	if err != nil {
+		log.Fatal("Failed to connect to database:", err)
+	}
+	defer pool.Close()
 
-	app.Get("/todos", func(c *fiber.Ctx) error {
-		return c.Status(200).JSON(todos)
-	})
+	err = pool.Ping(ctx)
+	if err != nil {
+		log.Fatal("Failed to ping database:", err)
+	}
 
-	//Create
-	app.Post("/api/todos", func(c *fiber.Ctx) error {
-		todo := &Todo{}
+	fmt.Println("Connected successfully to CockroachDB")
 
-		if err := c.BodyParser(todo); err != nil {
-			return err
-		}
+	app := fiber.New()
 
-		if todo.Body == "" {
-			return c.Status(400).JSON(fiber.Map{"error": "Todo body is missing"})
-		}
+	//Initiall routes declaration with middlewares
+	userRoutes := app.Group("/user", middlewares.ValidateRoutePrivate, middlewares.GetBearerToken)
+	authRoutes := app.Group("/auth")
+	apiRoutes := app.Group("/api", middlewares.ValidateRoutePrivate, middlewares.GetBearerToken)
+	// apipubRoutes:= app.Group("/apipub")
 
-		todo.ID = len(todos) + 1
-		todos = append(todos, *todo)
-
-		return c.Status(201).JSON(todo)
-	})
-
-	//Update
-	app.Patch("/api/todos/:id", func(c *fiber.Ctx) error {
-		id := c.Params("id")
-
-		for i, todo := range todos {
-			if fmt.Sprint(todo.ID) == id {
-				todos[i].Completed = !todos[i].Completed
-				return c.Status(200).JSON(todos)
-			}
-		}
-		return c.Status(404).JSON(fiber.Map{"error": "Todo not found"})
-	})
-
-	//Delete
-	app.Delete("/api/todos/:id", func(c *fiber.Ctx) error {
-		id := c.Params("id")
-
-		for i, todo := range todos {
-			if fmt.Sprint(todo.ID) == id {
-				todos = append(todos[:i], todos[i+1:]...)
-				return c.Status(200).JSON(fiber.Map{"success": true})
-			}
-		}
-		return c.Status(404).JSON(fiber.Map{"error": "Todo not found"})
-	})
+	//Creation of sub-routes
+	routers.UserRouter(userRoutes, pool)
+	routers.AuthRouter(authRoutes, pool)
+	routers.ApiRouter(apiRoutes, pool)
+	// routers.ApipubRouter(apipubRoutes)
 
 	log.Fatal(app.Listen(":" + PORT))
 }
