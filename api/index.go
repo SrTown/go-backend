@@ -28,13 +28,29 @@ func init() {
 			log.Fatal("COCKROACH_URI environment variable is not set")
 		}
 
-		// Create connection pool
+		config, err := pgxpool.ParseConfig(cockroachURI)
+		if err != nil {
+			log.Fatal("Failed to parse database config:", err)
+		}
+
+		config.MaxConns = 5 // Low number for serverless
+		config.MinConns = 1
+		config.MaxConnLifetime = 300 // 5 minutes
+		config.MaxConnIdleTime = 60  // 1 minute
+
 		ctx := context.Background()
-		var err error
-		pool, err = pgxpool.New(ctx, cockroachURI)
+		pool, err = pgxpool.NewWithConfig(ctx, config)
 		if err != nil {
 			log.Fatal("Failed to connect to database:", err)
 		}
+
+		// Create connection pool
+		// ctx := context.Background()
+		// var err error
+		// pool, err = pgxpool.New(ctx, cockroachURI)
+		// if err != nil {
+		// 	log.Fatal("Failed to connect to database:", err)
+		// }
 
 		// Test connection
 		err = pool.Ping(ctx)
