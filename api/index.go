@@ -23,7 +23,6 @@ var (
 // Initialize app once (connection pooling for serverless)
 func init() {
 	once.Do(func() {
-		// Get database URI from environment
 		cockroachURI := os.Getenv("COCKROACH_URI")
 		if cockroachURI == "" {
 			log.Fatal("COCKROACH_URI environment variable is not set")
