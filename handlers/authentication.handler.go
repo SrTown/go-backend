@@ -107,7 +107,7 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	}
 
 	// Create JWT token
-	tokenKeyword := os.Getenv("TOKEN_KEYWORD")
+	tokenKeyword := os.Getenv("muercielago-truora")
 	if tokenKeyword == "" {
 		tokenKeyword = "tokentest"
 	}

@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"net/http"
-	"os"
 	"sync"
 
 	"github.com/SrTown/go-backend/middlewares"
@@ -23,7 +22,7 @@ var (
 // Initialize app once (connection pooling for serverless)
 func init() {
 	once.Do(func() {
-		cockroachURI := os.Getenv("COCKROACH_URI")
+		cockroachURI := "postgresql://carlos:43-hcmxO4FtfI1ZAZj3WDA@aging-avocet-9538.jxf.gcp-us-east1.cockroachlabs.cloud:26257/stock-info?sslmode=verify-full"
 		if cockroachURI == "" {
 			log.Fatal("COCKROACH_URI environment variable is not set")
 		}

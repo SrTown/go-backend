@@ -27,7 +27,7 @@ func main() {
 		log.Fatal("Error loading .env file:", err)
 	}
 
-	COCKROCH_URI := os.Getenv("COCKROACH_URI")
+	COCKROCH_URI := "postgresql://carlos:43-hcmxO4FtfI1ZAZj3WDA@aging-avocet-9538.jxf.gcp-us-east1.cockroachlabs.cloud:26257/stock-info?sslmode=verify-full"
 	PORT := os.Getenv("PORT")
 
 	ctx := context.Background()

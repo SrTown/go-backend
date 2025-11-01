@@ -32,7 +32,7 @@ func GetBearerToken(c *fiber.Ctx) error {
 
 	token := parts[1]
 
-	tokenKeyword := os.Getenv("TOKEN_KEYWORD")
+	tokenKeyword := os.Getenv("muercielago-truora")
 	if tokenKeyword == "" {
 		tokenKeyword = "tokentest"
 	}
@@ -75,7 +75,7 @@ func ValidateRoutePrivate(c *fiber.Ctx) error {
 		})
 	}
 
-	tokenKeyword := os.Getenv("TOKEN_KEYWORD")
+	tokenKeyword := os.Getenv("muercielago-truora")
 	if tokenKeyword == "" {
 		tokenKeyword = "tokentest"
 	}
