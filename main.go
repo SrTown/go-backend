@@ -9,6 +9,7 @@ import (
 	"github.com/SrTown/go-backend/middlewares"
 	"github.com/SrTown/go-backend/routers"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 )
@@ -45,6 +46,14 @@ func main() {
 	fmt.Println("Connected successfully to CockroachDB")
 
 	app := fiber.New()
+
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     "*",
+		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",
+		AllowHeaders:     "Origin, Content-Type, Authorization",
+		ExposeHeaders:    "Content-Length, Authorization",
+		AllowCredentials: false,
+	}))
 
 	//Initiall routes declaration with middlewares
 	userRoutes := app.Group("/user", middlewares.ValidateRoutePrivate, middlewares.GetBearerToken)
