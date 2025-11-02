@@ -48,11 +48,13 @@ func main() {
 	app := fiber.New()
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "*",
+		AllowOriginsFunc: func(origin string) bool {
+			// Permite cualquier origen dinámicamente
+			return true
+		},
+		AllowCredentials: true,
 		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",
 		AllowHeaders:     "Origin, Content-Type, Authorization",
-		ExposeHeaders:    "Content-Length, Authorization",
-		AllowCredentials: false,
 	}))
 
 	//Initiall routes declaration with middlewares
